@@ -6,16 +6,11 @@ const statTotal = document.getElementById('stat-total');
 const statRepair = document.getElementById('stat-repair');
 const statSale = document.getElementById('stat-sale');
 
-const ordersKey = 'electrofix-orders';
-let orders = JSON.parse(localStorage.getItem(ordersKey) || '[]');
+let orders = [];
 
 function formatDate(value) {
   const date = new Date(value);
   return date.toLocaleDateString('es-AR', { year: 'numeric', month: 'short', day: 'numeric' });
-}
-
-function saveOrders() {
-  localStorage.setItem(ordersKey, JSON.stringify(orders));
 }
 
 function updateStats() {
@@ -80,7 +75,7 @@ function renderOrders() {
   });
 }
 
-function addOrder(event) {
+async function addOrder(event) {
   event.preventDefault();
   const cliente = document.getElementById('cliente').value.trim();
   const telefono = document.getElementById('telefono').value.trim();
@@ -106,7 +101,7 @@ function addOrder(event) {
   };
 
   orders.unshift(order);
-  saveOrders();
+  await saveOrderToDB(order);
   renderOrders();
   updateStats();
   orderForm.reset();
@@ -118,7 +113,7 @@ function cycleStatus(currentStatus) {
   return statusOrder[(currentIndex + 1) % statusOrder.length];
 }
 
-function handleOrderAction(event) {
+async function handleOrderAction(event) {
   const button = event.target.closest('button[data-action]');
   if (!button) return;
 
@@ -127,14 +122,14 @@ function handleOrderAction(event) {
 
   if (action === 'toggle') {
     orders[index].estado = cycleStatus(orders[index].estado);
-    saveOrders();
+    await saveOrderToDB(orders[index]);
     renderOrders();
     updateStats();
   }
 
   if (action === 'delete') {
-    orders.splice(index, 1);
-    saveOrders();
+    const [removed] = orders.splice(index, 1);
+    await deleteOrderFromDB(removed.id);
     renderOrders();
     updateStats();
   }
@@ -145,9 +140,21 @@ orderList.addEventListener('click', handleOrderAction);
 searchInput.addEventListener('input', renderOrders);
 filterStatus.addEventListener('change', renderOrders);
 
-if (orders.length > 0) {
-  renderOrders();
-} else {
-  orderList.innerHTML = '<p class="empty-state">Aún no hay órdenes. Crea la primera orden en el formulario.</p>';
+async function initApp() {
+  try {
+    orders = await getOrdersFromDB();
+  } catch (error) {
+    console.warn('No se pudo abrir la base de datos IndexedDB:', error);
+    orders = [];
+  }
+
+  if (orders.length > 0) {
+    renderOrders();
+  } else {
+    orderList.innerHTML = '<p class="empty-state">Aún no hay órdenes. Crea la primera orden en el formulario.</p>';
+  }
+
+  updateStats();
 }
-updateStats();
+
+initApp();
