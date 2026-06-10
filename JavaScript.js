@@ -19,6 +19,7 @@ const registerEmail = document.getElementById('register-email');
 const registerPassword = document.getElementById('register-password');
 const registerPasswordConfirm = document.getElementById('register-password-confirm');
 const clientAccessMessage = document.getElementById('client-access-message');
+const clientRegisterMessage = document.getElementById('client-register-message');
 const clientTabLink = document.getElementById('client-tab-link');
 const deliverySection = document.getElementById('entrega');
 const clientOrderSelect = document.getElementById('client-order-select');
@@ -59,13 +60,23 @@ function setAuthMode(mode) {
     registerModeBtn.classList.remove('active');
     clientLoginForm.classList.remove('hidden');
     clientRegisterForm.classList.add('hidden');
-    clientAccessMessage.textContent = '';
   } else {
     registerModeBtn.classList.add('active');
     loginModeBtn.classList.remove('active');
     clientRegisterForm.classList.remove('hidden');
     clientLoginForm.classList.add('hidden');
-    clientAccessMessage.textContent = '';
+  }
+  clientAccessMessage.textContent = '';
+  clientRegisterMessage.textContent = '';
+}
+
+function setAuthMessage(message) {
+  clientAccessMessage.textContent = '';
+  clientRegisterMessage.textContent = '';
+  if (clientLoginForm.classList.contains('hidden')) {
+    clientRegisterMessage.textContent = message;
+  } else {
+    clientAccessMessage.textContent = message;
   }
 }
 
@@ -77,6 +88,7 @@ function clearAuthForms() {
   registerPassword.value = '';
   registerPasswordConfirm.value = '';
   clientAccessMessage.textContent = '';
+  clientRegisterMessage.textContent = '';
 }
 
 function updateClientUI() {
