@@ -164,6 +164,38 @@ a {
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+.client-access-panel {
+  margin-top: 1.5rem;
+  background: rgba(16, 24, 46, 0.95);
+}
+
+.client-access-btn {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: #f8faff;
+  border-radius: 999px;
+  padding: 0.9rem 1.4rem;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease;
+}
+
+.client-access-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.client-message {
+  margin: 0.75rem 0 0;
+  color: #f3b0b0;
+  font-size: 0.95rem;
+}
+
 .panel-header {
   display: flex;
   flex-wrap: wrap;

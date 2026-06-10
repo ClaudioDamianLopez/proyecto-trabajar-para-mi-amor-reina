@@ -5,8 +5,23 @@ const filterStatus = document.getElementById('filter-status');
 const statTotal = document.getElementById('stat-total');
 const statRepair = document.getElementById('stat-repair');
 const statSale = document.getElementById('stat-sale');
+const clientAccessBtn = document.getElementById('client-access-btn');
+const clientAccessPanel = document.getElementById('client-access-panel');
+const clientAccessForm = document.getElementById('client-access-form');
+const clientOrderIdInput = document.getElementById('client-order-id');
+const clientAccessMessage = document.getElementById('client-access-message');
+const clientTabLink = document.getElementById('client-tab-link');
+const deliverySection = document.getElementById('entrega');
+const deliveryForm = document.getElementById('delivery-form');
+const deliveryOrderId = document.getElementById('delivery-order-id');
+const deliveryEquipo = document.getElementById('delivery-equipo');
+const deliveryAccesorios = document.getElementById('delivery-accesorios');
+const deliveryEstado = document.getElementById('delivery-estado');
+const deliveryNotes = document.getElementById('delivery-notes');
+const deliveryMessage = document.getElementById('delivery-message');
 
 let orders = [];
+let activeClientOrder = null;
 
 function formatDate(value) {
   const date = new Date(value);
@@ -113,6 +128,61 @@ function cycleStatus(currentStatus) {
   return statusOrder[(currentIndex + 1) % statusOrder.length];
 }
 
+function showDeliverySection(order) {
+  activeClientOrder = order;
+  deliverySection.classList.remove('hidden');
+  clientTabLink.classList.remove('hidden');
+  deliveryOrderId.value = order.id;
+  deliveryEquipo.value = order.deliveryEquipo || `${order.categoria} • ${order.servicio}`;
+  deliveryAccesorios.value = order.deliveryAccesorios || '';
+  deliveryEstado.value = order.deliveryEstado || 'Entregado';
+  deliveryNotes.value = order.deliveryNotes || '';
+  deliveryMessage.textContent = '';
+}
+
+function showClientPanel() {
+  clientAccessPanel.classList.toggle('hidden');
+  clientAccessMessage.textContent = '';
+}
+
+async function handleClientAccess(event) {
+  event.preventDefault();
+  const orderId = clientOrderIdInput.value.trim();
+
+  if (!orderId) {
+    clientAccessMessage.textContent = 'Ingresa el número de orden para continuar.';
+    return;
+  }
+
+  const order = orders.find(item => item.id === orderId);
+  if (!order) {
+    clientAccessMessage.textContent = 'Orden no encontrada. Verifica el número de orden.';
+    return;
+  }
+
+  showDeliverySection(order);
+  clientAccessPanel.classList.add('hidden');
+  window.location.hash = 'entrega';
+}
+
+async function saveDeliveryInfo(event) {
+  event.preventDefault();
+
+  if (!activeClientOrder) {
+    return;
+  }
+
+  activeClientOrder.deliveryEquipo = deliveryEquipo.value.trim();
+  activeClientOrder.deliveryAccesorios = deliveryAccesorios.value.trim();
+  activeClientOrder.deliveryEstado = deliveryEstado.value;
+  activeClientOrder.deliveryNotes = deliveryNotes.value.trim();
+
+  await saveOrderToDB(activeClientOrder);
+  deliveryMessage.textContent = 'Información de entrega guardada correctamente.';
+  renderOrders();
+  updateStats();
+}
+
 async function handleOrderAction(event) {
   const button = event.target.closest('button[data-action]');
   if (!button) return;
@@ -139,6 +209,9 @@ orderForm.addEventListener('submit', addOrder);
 orderList.addEventListener('click', handleOrderAction);
 searchInput.addEventListener('input', renderOrders);
 filterStatus.addEventListener('change', renderOrders);
+clientAccessBtn.addEventListener('click', showClientPanel);
+clientAccessForm.addEventListener('submit', handleClientAccess);
+deliveryForm.addEventListener('submit', saveDeliveryInfo);
 
 async function initApp() {
   try {

@@ -23,10 +23,41 @@
         <a href="#ordenes">Ordenar</a>
         <a href="#servicios">Órdenes</a>
         <a href="#contacto">Contacto</a>
+        <a href="#entrega" id="client-tab-link" class="hidden">Entrega</a>
       </nav>
+      <button id="client-access-btn" class="secondary-btn client-access-btn">
+        Acceso clientes
+      </button>
     </header>
 
     <main class="page-container">
+      <section
+        id="client-access-panel"
+        class="panel client-access-panel hidden"
+      >
+        <div class="panel-header">
+          <div>
+            <h2>Acceso para clientes</h2>
+            <p>
+              Ingresa el número de orden para completar la información de
+              entrega.
+            </p>
+          </div>
+        </div>
+        <form id="client-access-form" class="order-form">
+          <div class="field-group">
+            <label for="client-order-id">Número de orden</label>
+            <input
+              type="text"
+              id="client-order-id"
+              placeholder="Ej. ORD-1657821300000"
+              required
+            />
+          </div>
+          <p id="client-access-message" class="client-message"></p>
+          <button type="submit" class="btn-primary">Abrir orden</button>
+        </form>
+      </section>
       <section class="hero" id="dashboard">
         <div class="hero-content">
           <h2>
@@ -158,6 +189,57 @@
             Aún no hay órdenes. Crea la primera orden en el formulario.
           </p>
         </div>
+      </section>
+
+      <section id="entrega" class="panel hidden">
+        <div class="panel-header">
+          <div>
+            <h2>Entrega de equipo</h2>
+            <p>Completa la información del equipo a entregar para tu orden.</p>
+          </div>
+        </div>
+        <form id="delivery-form" class="order-form">
+          <div class="field-group">
+            <label for="delivery-order-id">Número de orden</label>
+            <input type="text" id="delivery-order-id" readonly />
+          </div>
+          <div class="field-group">
+            <label for="delivery-equipo">Equipo</label>
+            <input
+              type="text"
+              id="delivery-equipo"
+              placeholder="Ej. Celular Samsung Galaxy"
+              required
+            />
+          </div>
+          <div class="field-group">
+            <label for="delivery-accesorios">Accesorios entregados</label>
+            <input
+              type="text"
+              id="delivery-accesorios"
+              placeholder="Ej. Cargador, funda"
+            />
+          </div>
+          <div class="field-group">
+            <label for="delivery-estado">Condición final</label>
+            <select id="delivery-estado" required>
+              <option value="">Selecciona condición</option>
+              <option value="Entregado">Entregado</option>
+              <option value="Pendiente retiro">Pendiente retiro</option>
+              <option value="No entregado">No entregado</option>
+            </select>
+          </div>
+          <div class="field-group full-width">
+            <label for="delivery-notes">Observaciones de entrega</label>
+            <textarea
+              id="delivery-notes"
+              rows="3"
+              placeholder="Ej. Cliente solo entregó equipo sin batería"
+            ></textarea>
+          </div>
+          <button type="submit" class="btn-primary">Guardar entrega</button>
+        </form>
+        <p id="delivery-message" class="client-message"></p>
       </section>
 
       <section class="contact" id="contacto">
