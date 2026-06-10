@@ -1,6 +1,7 @@
 const DB_NAME = 'ElectroFixDB';
 const DB_VERSION = 1;
 const STORE_NAME = 'orders';
+const CLIENT_STORE = 'clients';
 
 function openDatabase() {
     if (!window.indexedDB) {
@@ -15,9 +16,15 @@ function openDatabase() {
             if (!db.objectStoreNames.contains(STORE_NAME)) {
                 const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
                 store.createIndex('cliente', 'cliente', { unique: false });
+                store.createIndex('clienteEmail', 'clienteEmail', { unique: false });
                 store.createIndex('categoria', 'categoria', { unique: false });
                 store.createIndex('servicio', 'servicio', { unique: false });
                 store.createIndex('estado', 'estado', { unique: false });
+            }
+
+            if (!db.objectStoreNames.contains(CLIENT_STORE)) {
+                const clientStore = db.createObjectStore(CLIENT_STORE, { keyPath: 'email' });
+                clientStore.createIndex('email', 'email', { unique: true });
             }
         };
 
@@ -65,6 +72,32 @@ async function deleteOrderFromDB(id) {
         const request = store.delete(id);
 
         request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+        transaction.oncomplete = () => db.close();
+    });
+}
+
+async function getClientFromDB(email) {
+    const db = await openDatabase();
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(CLIENT_STORE, 'readonly');
+        const store = transaction.objectStore(CLIENT_STORE);
+        const request = store.get(email);
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+        transaction.oncomplete = () => db.close();
+    });
+}
+
+async function saveClientToDB(client) {
+    const db = await openDatabase();
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(CLIENT_STORE, 'readwrite');
+        const store = transaction.objectStore(CLIENT_STORE);
+        const request = store.put(client);
+
+        request.onsuccess = () => resolve(request.result);
         request.onerror = () => reject(request.error);
         transaction.oncomplete = () => db.close();
     });

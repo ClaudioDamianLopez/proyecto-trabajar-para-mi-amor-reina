@@ -28,6 +28,12 @@
       <button id="client-access-btn" class="secondary-btn client-access-btn">
         Acceso clientes
       </button>
+      <button
+        id="client-logout-btn"
+        class="secondary-btn client-access-btn hidden"
+      >
+        Cerrar sesión
+      </button>
     </header>
 
     <main class="page-container">
@@ -38,24 +44,88 @@
         <div class="panel-header">
           <div>
             <h2>Acceso para clientes</h2>
-            <p>
-              Ingresa el número de orden para completar la información de
-              entrega.
-            </p>
+            <p>Inicia sesión o crea tu usuario para acceder a tus órdenes.</p>
+          </div>
+          <div class="auth-switch">
+            <button
+              id="login-mode-btn"
+              type="button"
+              class="auth-switch-btn active"
+            >
+              Login
+            </button>
+            <button
+              id="register-mode-btn"
+              type="button"
+              class="auth-switch-btn"
+            >
+              Registrarse
+            </button>
           </div>
         </div>
-        <form id="client-access-form" class="order-form">
+
+        <form id="client-login-form" class="order-form">
           <div class="field-group">
-            <label for="client-order-id">Número de orden</label>
+            <label for="login-email">Email</label>
             <input
-              type="text"
-              id="client-order-id"
-              placeholder="Ej. ORD-1657821300000"
+              type="email"
+              id="login-email"
+              placeholder="ejemplo@correo.com"
+              required
+            />
+          </div>
+          <div class="field-group">
+            <label for="login-password">Contraseña</label>
+            <input
+              type="password"
+              id="login-password"
+              placeholder="Contraseña"
               required
             />
           </div>
           <p id="client-access-message" class="client-message"></p>
-          <button type="submit" class="btn-primary">Abrir orden</button>
+          <button type="submit" class="btn-primary">Entrar</button>
+        </form>
+
+        <form id="client-register-form" class="order-form hidden">
+          <div class="field-group">
+            <label for="register-name">Nombre</label>
+            <input
+              type="text"
+              id="register-name"
+              placeholder="Tu nombre"
+              required
+            />
+          </div>
+          <div class="field-group">
+            <label for="register-email">Email</label>
+            <input
+              type="email"
+              id="register-email"
+              placeholder="ejemplo@correo.com"
+              required
+            />
+          </div>
+          <div class="field-group">
+            <label for="register-password">Contraseña</label>
+            <input
+              type="password"
+              id="register-password"
+              placeholder="Contraseña"
+              required
+            />
+          </div>
+          <div class="field-group">
+            <label for="register-password-confirm">Confirmar contraseña</label>
+            <input
+              type="password"
+              id="register-password-confirm"
+              placeholder="Repite la contraseña"
+              required
+            />
+          </div>
+          <p id="client-register-message" class="client-message"></p>
+          <button type="submit" class="btn-primary">Registrar</button>
         </form>
       </section>
       <section class="hero" id="dashboard">
@@ -114,6 +184,15 @@
               type="text"
               id="telefono"
               placeholder="Ej. 11 1234 5678"
+              required
+            />
+          </div>
+          <div class="field-group">
+            <label for="email">Email del cliente</label>
+            <input
+              type="email"
+              id="email"
+              placeholder="Ej. cliente@correo.com"
               required
             />
           </div>
@@ -198,6 +277,11 @@
             <p>Completa la información del equipo a entregar para tu orden.</p>
           </div>
         </div>
+        <div class="field-group">
+          <label for="client-order-select">Selecciona tu orden</label>
+          <select id="client-order-select"></select>
+        </div>
+        <p id="client-orders-message" class="client-message"></p>
         <form id="delivery-form" class="order-form">
           <div class="field-group">
             <label for="delivery-order-id">Número de orden</label>

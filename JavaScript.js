@@ -6,12 +6,23 @@ const statTotal = document.getElementById('stat-total');
 const statRepair = document.getElementById('stat-repair');
 const statSale = document.getElementById('stat-sale');
 const clientAccessBtn = document.getElementById('client-access-btn');
+const clientLogoutBtn = document.getElementById('client-logout-btn');
 const clientAccessPanel = document.getElementById('client-access-panel');
-const clientAccessForm = document.getElementById('client-access-form');
-const clientOrderIdInput = document.getElementById('client-order-id');
+const loginModeBtn = document.getElementById('login-mode-btn');
+const registerModeBtn = document.getElementById('register-mode-btn');
+const clientLoginForm = document.getElementById('client-login-form');
+const clientRegisterForm = document.getElementById('client-register-form');
+const loginEmail = document.getElementById('login-email');
+const loginPassword = document.getElementById('login-password');
+const registerName = document.getElementById('register-name');
+const registerEmail = document.getElementById('register-email');
+const registerPassword = document.getElementById('register-password');
+const registerPasswordConfirm = document.getElementById('register-password-confirm');
 const clientAccessMessage = document.getElementById('client-access-message');
 const clientTabLink = document.getElementById('client-tab-link');
 const deliverySection = document.getElementById('entrega');
+const clientOrderSelect = document.getElementById('client-order-select');
+const clientOrdersMessage = document.getElementById('client-orders-message');
 const deliveryForm = document.getElementById('delivery-form');
 const deliveryOrderId = document.getElementById('delivery-order-id');
 const deliveryEquipo = document.getElementById('delivery-equipo');
@@ -22,6 +33,7 @@ const deliveryMessage = document.getElementById('delivery-message');
 
 let orders = [];
 let activeClientOrder = null;
+let loggedInClient = null;
 
 function formatDate(value) {
   const date = new Date(value);
@@ -34,11 +46,191 @@ function updateStats() {
   statSale.textContent = orders.filter(order => order.servicio === 'Venta').length;
 }
 
-function renderOrders() {
+async function hashPassword(password) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hashBuffer)).map(byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
+function setAuthMode(mode) {
+  if (mode === 'login') {
+    loginModeBtn.classList.add('active');
+    registerModeBtn.classList.remove('active');
+    clientLoginForm.classList.remove('hidden');
+    clientRegisterForm.classList.add('hidden');
+    clientAccessMessage.textContent = '';
+  } else {
+    registerModeBtn.classList.add('active');
+    loginModeBtn.classList.remove('active');
+    clientRegisterForm.classList.remove('hidden');
+    clientLoginForm.classList.add('hidden');
+    clientAccessMessage.textContent = '';
+  }
+}
+
+function clearAuthForms() {
+  loginEmail.value = '';
+  loginPassword.value = '';
+  registerName.value = '';
+  registerEmail.value = '';
+  registerPassword.value = '';
+  registerPasswordConfirm.value = '';
+  clientAccessMessage.textContent = '';
+}
+
+function updateClientUI() {
+  clientAccessBtn.classList.toggle('hidden', Boolean(loggedInClient));
+  clientLogoutBtn.classList.toggle('hidden', !loggedInClient);
+  clientTabLink.classList.toggle('hidden', !loggedInClient);
+  if (!loggedInClient) {
+    deliverySection.classList.add('hidden');
+  }
+}
+
+async function registerClient(event) {
+  event.preventDefault();
+  const name = registerName.value.trim();
+  const email = registerEmail.value.trim().toLowerCase();
+  const password = registerPassword.value;
+  const confirmPassword = registerPasswordConfirm.value;
+
+  if (!name || !email || !password || !confirmPassword) {
+    clientAccessMessage.textContent = 'Completa todos los campos para registrarte.';
+    return;
+  }
+  if (password !== confirmPassword) {
+    clientAccessMessage.textContent = 'Las contraseñas no coinciden.';
+    return;
+  }
+
+  const existingClient = await getClientFromDB(email);
+  if (existingClient) {
+    clientAccessMessage.textContent = 'Ya existe un usuario con ese email.';
+    return;
+  }
+
+  const passwordHash = await hashPassword(password);
+  const client = { name, email, passwordHash };
+  await saveClientToDB(client);
+  clearAuthForms();
+  setAuthMode('login');
+  clientAccessMessage.textContent = 'Registro exitoso. Ahora inicia sesión.';
+}
+
+async function loginClient(event) {
+  event.preventDefault();
+  const email = loginEmail.value.trim().toLowerCase();
+  const password = loginPassword.value;
+
+  if (!email || !password) {
+    clientAccessMessage.textContent = 'Completa email y contraseña para ingresar.';
+    return;
+  }
+
+  const client = await getClientFromDB(email);
+  if (!client) {
+    clientAccessMessage.textContent = 'Usuario no encontrado. Regístrate primero.';
+    return;
+  }
+
+  const passwordHash = await hashPassword(password);
+  if (client.passwordHash !== passwordHash) {
+    clientAccessMessage.textContent = 'Contraseña incorrecta.';
+    return;
+  }
+
+  loggedInClient = client;
+  clearAuthForms();
+  updateClientUI();
+  renderClientOrders();
+  clientAccessPanel.classList.add('hidden');
+}
+
+function logoutClient() {
+  loggedInClient = null;
+  activeClientOrder = null;
+  clientOrderSelect.innerHTML = '';
+  clientOrdersMessage.textContent = '';
+  deliverySection.classList.add('hidden');
+  updateClientUI();
+}
+
+function renderClientOrders() {
+  if (!loggedInClient) {
+    clientOrderSelect.innerHTML = '';
+    clientOrdersMessage.textContent = 'Inicia sesión para ver tus órdenes.';
+    return;
+  }
+
+  const clientOrders = orders.filter(order => order.clienteEmail === loggedInClient.email);
+  if (clientOrders.length === 0) {
+    clientOrderSelect.innerHTML = '<option value="">Sin órdenes registradas</option>';
+    clientOrdersMessage.textContent = 'No tienes órdenes asociadas a este email.';
+    return;
+  }
+
+  clientOrdersMessage.textContent = '';
+  clientOrderSelect.innerHTML = clientOrders
+    .map(order => `<option value="${order.id}">${order.id} — ${order.categoria} / ${order.servicio}</option>`)
+    .join('');
+  loadClientOrder(clientOrders[0].id);
+}
+
+function loadClientOrder(orderId) {
+  const order = orders.find(item => item.id === orderId && item.clienteEmail === loggedInClient.email);
+  if (!order) {
+    clientOrdersMessage.textContent = 'Orden no encontrada o no pertenece a tu cuenta.';
+    return;
+  }
+
+  activeClientOrder = order;
+  deliveryOrderId.value = order.id;
+  deliveryEquipo.value = order.deliveryEquipo || `${order.categoria} • ${order.servicio}`;
+  deliveryAccesorios.value = order.deliveryAccesorios || '';
+  deliveryEstado.value = order.deliveryEstado || 'Entregado';
+  deliveryNotes.value = order.deliveryNotes || '';
+  deliverySection.classList.remove('hidden');
+  clientOrdersMessage.textContent = '';
+}
+
+function handleOrderSelectChange() {
+  if (!clientOrderSelect.value) {
+    deliverySection.classList.add('hidden');
+    return;
+  }
+  loadClientOrder(clientOrderSelect.value);
+}
+
+function showClientPanel() {
+  clientAccessPanel.classList.toggle('hidden');
+  clientAccessMessage.textContent = '';
+  setAuthMode('login');
+}
+
+async function saveDeliveryInfo(event) {
+  event.preventDefault();
+
+  if (!activeClientOrder) {
+    return;
+  }
+
+  activeClientOrder.deliveryEquipo = deliveryEquipo.value.trim();
+  activeClientOrder.deliveryAccesorios = deliveryAccesorios.value.trim();
+  activeClientOrder.deliveryEstado = deliveryEstado.value;
+  activeClientOrder.deliveryNotes = deliveryNotes.value.trim();
+
+  await saveOrderToDB(activeClientOrder);
+  deliveryMessage.textContent = 'Información de entrega guardada correctamente.';
+  renderOrders();
+  updateStats();
+}
+
+function cycleStatus(currentStatus) {
   const query = searchInput.value.toLowerCase().trim();
   const status = filterStatus.value;
   const visibleOrders = orders.filter(order => {
-    const text = [order.cliente, order.categoria, order.servicio, order.detalle].join(' ').toLowerCase();
+    const text = [order.cliente, order.clienteEmail, order.categoria, order.servicio, order.detalle].join(' ').toLowerCase();
     const matchesQuery = query === '' || text.includes(query);
     const matchesStatus = status === 'Todas' || order.estado === status;
     return matchesQuery && matchesStatus;
@@ -98,9 +290,10 @@ async function addOrder(event) {
   const servicio = document.getElementById('servicio').value;
   const detalle = document.getElementById('detalle').value.trim();
   const estado = document.getElementById('estado').value;
+  const correo = document.getElementById('email').value.trim().toLowerCase();
   const fecha = document.getElementById('fecha').value;
 
-  if (!cliente || !telefono || !categoria || !servicio || !detalle || !estado || !fecha) {
+  if (!cliente || !telefono || !correo || !categoria || !servicio || !detalle || !estado || !fecha) {
     return;
   }
 
@@ -108,6 +301,7 @@ async function addOrder(event) {
     id: `ORD-${Date.now()}`,
     cliente,
     telefono,
+    clienteEmail: correo,
     categoria,
     servicio,
     detalle,
@@ -145,26 +339,6 @@ function showClientPanel() {
   clientAccessMessage.textContent = '';
 }
 
-async function handleClientAccess(event) {
-  event.preventDefault();
-  const orderId = clientOrderIdInput.value.trim();
-
-  if (!orderId) {
-    clientAccessMessage.textContent = 'Ingresa el número de orden para continuar.';
-    return;
-  }
-
-  const order = orders.find(item => item.id === orderId);
-  if (!order) {
-    clientAccessMessage.textContent = 'Orden no encontrada. Verifica el número de orden.';
-    return;
-  }
-
-  showDeliverySection(order);
-  clientAccessPanel.classList.add('hidden');
-  window.location.hash = 'entrega';
-}
-
 async function saveDeliveryInfo(event) {
   event.preventDefault();
 
@@ -181,6 +355,14 @@ async function saveDeliveryInfo(event) {
   deliveryMessage.textContent = 'Información de entrega guardada correctamente.';
   renderOrders();
   updateStats();
+}
+
+function handleOrderSelectChange() {
+  if (!clientOrderSelect.value) {
+    deliverySection.classList.add('hidden');
+    return;
+  }
+  loadClientOrder(clientOrderSelect.value);
 }
 
 async function handleOrderAction(event) {
@@ -210,7 +392,12 @@ orderList.addEventListener('click', handleOrderAction);
 searchInput.addEventListener('input', renderOrders);
 filterStatus.addEventListener('change', renderOrders);
 clientAccessBtn.addEventListener('click', showClientPanel);
-clientAccessForm.addEventListener('submit', handleClientAccess);
+clientLogoutBtn.addEventListener('click', logoutClient);
+loginModeBtn.addEventListener('click', () => setAuthMode('login'));
+registerModeBtn.addEventListener('click', () => setAuthMode('register'));
+clientLoginForm.addEventListener('submit', loginClient);
+clientRegisterForm.addEventListener('submit', registerClient);
+clientOrderSelect.addEventListener('change', handleOrderSelectChange);
 deliveryForm.addEventListener('submit', saveDeliveryInfo);
 
 async function initApp() {
