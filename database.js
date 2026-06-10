@@ -89,7 +89,7 @@ async function getClientFromDB(email) {
         transaction.oncomplete = () => db.close();
     });
 }
-
+import { SpeedInsights } from "@vercel/speed-insights/next"
 async function saveClientToDB(client) {
     const db = await openDatabase();
     return new Promise((resolve, reject) => {
