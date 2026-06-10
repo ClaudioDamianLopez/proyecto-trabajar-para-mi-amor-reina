@@ -1,27 +1,192 @@
-<!doctype html>
-<html lang="en">
+﻿<!doctype html>
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>ElectroFix | Gestión de pedidos de reparación y venta</title>
+    <link rel="stylesheet" href="Styless.css" />
+    <script src="JavaScript.js" defer></script>
   </head>
   <body>
-    <li>Inicio</li>
-    <li>Reparaciones
-      <li>Celulares</li>
-      <li>Labarropas</li>
-      <li>Secarropas</li>
-      <li>Laptos / Pcs</li>
-      <li>Consolas de video juego</li>
-    </li>
-    <li>Sobre Nosotros</li>
-    <li>Contacto</li>
-    <li>Redes</li>
-    <h1>Bienvenidos a </h1>
-    <h2>Lorem ipsum dolor sit amet consectetur adipisicing elit. 
-      Sed amet deleniti voluptatum nesciunt odio pariatur tempora ipsum,
-       quos beatae, id quaerat dicta dolorum iusto dolores 
-       mollitia dolore. Recusandae, nobis laudantium?</h2>
-       
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-logo">⚡</span>
+        <div>
+          <h1>ElectroFix</h1>
+          <p>Gestión de órdenes de reparación y ventas de electrodomésticos</p>
+        </div>
+      </div>
+
+      <nav class="menu">
+        <a href="#dashboard">Dashboard</a>
+        <a href="#ordenes">Ordenar</a>
+        <a href="#servicios">Órdenes</a>
+        <a href="#contacto">Contacto</a>
+      </nav>
+    </header>
+
+    <main class="page-container">
+      <section class="hero" id="dashboard">
+        <div class="hero-content">
+          <h2>
+            Administra pedidos de reparación y venta para celulares, lavarropas,
+            PCs y consolas
+          </h2>
+          <p>
+            Registra cada orden, controla cambios de estado y organiza tu taller
+            con rapidez.
+          </p>
+        </div>
+        <div class="hero-cards">
+          <article class="stat-card">
+            <span>📦</span>
+            <h3 id="stat-total">0</h3>
+            <p>Órdenes totales</p>
+          </article>
+          <article class="stat-card">
+            <span>🛠️</span>
+            <h3 id="stat-repair">0</h3>
+            <p>En reparación</p>
+          </article>
+          <article class="stat-card">
+            <span>💰</span>
+            <h3 id="stat-sale">0</h3>
+            <p>Ventas</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel" id="ordenes">
+        <div class="panel-header">
+          <div>
+            <h2>Crear nueva orden</h2>
+            <p>
+              Registra reparaciones y ventas con datos del cliente y del equipo.
+            </p>
+          </div>
+        </div>
+
+        <form id="order-form" class="order-form">
+          <div class="field-group">
+            <label for="cliente">Nombre del cliente</label>
+            <input
+              type="text"
+              id="cliente"
+              placeholder="Ej. María Pérez"
+              required
+            />
+          </div>
+          <div class="field-group">
+            <label for="telefono">Teléfono</label>
+            <input
+              type="text"
+              id="telefono"
+              placeholder="Ej. 11 1234 5678"
+              required
+            />
+          </div>
+          <div class="field-group">
+            <label for="categoria">Categoría</label>
+            <select id="categoria" required>
+              <option value="">Selecciona categoría</option>
+              <option value="Celular">Celular</option>
+              <option value="Lavarropas">Lavarropas</option>
+              <option value="Secarropas">Secarropas</option>
+              <option value="PC">PC / Laptop</option>
+              <option value="Consola">Consola de videojuegos</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label for="servicio">Servicio</label>
+            <select id="servicio" required>
+              <option value="">Selecciona servicio</option>
+              <option value="Reparación">Reparación</option>
+              <option value="Venta">Venta</option>
+            </select>
+          </div>
+          <div class="field-group full-width">
+            <label for="detalle">Detalle del equipo</label>
+            <textarea
+              id="detalle"
+              rows="3"
+              placeholder="Ej. Pantalla rota, no enciende, entrega sin accesorios"
+              required
+            ></textarea>
+          </div>
+          <div class="field-group full-width small-grid">
+            <div>
+              <label for="estado">Estado</label>
+              <select id="estado" required>
+                <option value="Pendiente">Pendiente</option>
+                <option value="En progreso">En progreso</option>
+                <option value="Completado">Completado</option>
+              </select>
+            </div>
+            <div>
+              <label for="fecha">Fecha</label>
+              <input type="date" id="fecha" required />
+            </div>
+          </div>
+          <button type="submit" class="btn-primary">Guardar orden</button>
+        </form>
+      </section>
+
+      <section class="panel" id="servicios">
+        <div class="panel-header">
+          <div>
+            <h2>Órdenes registradas</h2>
+            <p>Filtra, busca y actualiza el estado de cada pedido.</p>
+          </div>
+          <div class="controls">
+            <input
+              type="text"
+              id="search"
+              placeholder="Buscar por cliente, categoría o detalle"
+            />
+            <select id="filter-status">
+              <option value="Todas">Todas</option>
+              <option value="Pendiente">Pendiente</option>
+              <option value="En progreso">En progreso</option>
+              <option value="Completado">Completado</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="order-list" class="order-list">
+          <p class="empty-state">
+            Aún no hay órdenes. Crea la primera orden en el formulario.
+          </p>
+        </div>
+      </section>
+
+      <section class="contact" id="contacto">
+        <div>
+          <h2>Contacto</h2>
+          <p>
+            ¿Necesitas ayuda con una orden o quieres una cotización? Contáctanos
+            y te respondemos rápido.
+          </p>
+        </div>
+        <div class="contact-info">
+          <div>
+            <strong>📍 Ubicación</strong>
+            <span>Tu taller local, ciudad</span>
+          </div>
+          <div>
+            <strong>📞 Teléfono</strong>
+            <span>11 6000 7000</span>
+          </div>
+          <div>
+            <strong>✉️ Email</strong>
+            <span>contacto@electrofix.com</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>ElectroFix © 2026</span>
+      <span>Gestión de pedidos de reparación y venta de electrodomésticos</span>
+    </footer>
   </body>
 </html>
