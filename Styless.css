@@ -433,17 +433,90 @@ a {
   .hero-cards,
   .controls,
   .order-card .order-grid,
-  .small-grid,
-  .menu {
+  .small-grid {
     grid-template-columns: 1fr;
   }
 
   .topbar {
     flex-direction: column;
     align-items: flex-start;
+    padding: 1rem 1.2rem;
+  }
+
+  .brand {
+    width: 100%;
+  }
+
+  .menu {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .client-access-btn {
+    width: 100%;
+  }
+
+  .panel,
+  .contact {
+    padding: 1.5rem;
+  }
+
+  .panel-header {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .footer {
+    flex-direction: column;
+    padding: 0 1.2rem;
+  }
+}
+
+@media (max-width: 620px) {
+  .page-container {
+    padding: 1.25rem;
+  }
+
+  .topbar {
+    gap: 0.85rem;
+  }
+
+  .brand {
+    gap: 0.85rem;
+  }
+
+  .brand h1 {
+    font-size: 1.15rem;
+  }
+
+  .hero,
+  .panel,
+  .contact {
+    border-radius: 20px;
+  }
+
+  .field-group.full-width,
+  .order-card .order-grid,
+  .small-grid,
+  .hero-cards,
+  .controls {
+    grid-template-columns: 1fr;
+  }
+
+  .field-group input,
+  .field-group textarea,
+  .field-group select,
+  .btn-primary,
+  .secondary-btn,
+  .client-access-btn {
+    width: 100%;
+  }
+
+  .menu {
+    gap: 0.55rem;
+  }
+
+  .order-card .card-actions {
     flex-direction: column;
   }
 }
