@@ -108,17 +108,17 @@ async function registerClient(event) {
   const confirmPassword = registerPasswordConfirm.value;
 
   if (!name || !email || !password || !confirmPassword) {
-    clientAccessMessage.textContent = 'Completa todos los campos para registrarte.';
+    setAuthMessage('Completa todos los campos para registrarte.');
     return;
   }
   if (password !== confirmPassword) {
-    clientAccessMessage.textContent = 'Las contraseñas no coinciden.';
+    setAuthMessage('Las contraseñas no coinciden.');
     return;
   }
 
   const existingClient = await getClientFromDB(email);
   if (existingClient) {
-    clientAccessMessage.textContent = 'Ya existe un usuario con ese email.';
+    setAuthMessage('Ya existe un usuario con ese email.');
     return;
   }
 
@@ -127,7 +127,7 @@ async function registerClient(event) {
   await saveClientToDB(client);
   clearAuthForms();
   setAuthMode('login');
-  clientAccessMessage.textContent = 'Registro exitoso. Ahora inicia sesión.';
+  setAuthMessage('Registro exitoso. Ahora inicia sesión.');
 }
 
 async function loginClient(event) {
@@ -136,19 +136,19 @@ async function loginClient(event) {
   const password = loginPassword.value;
 
   if (!email || !password) {
-    clientAccessMessage.textContent = 'Completa email y contraseña para ingresar.';
+    setAuthMessage('Completa email y contraseña para ingresar.');
     return;
   }
 
   const client = await getClientFromDB(email);
   if (!client) {
-    clientAccessMessage.textContent = 'Usuario no encontrado. Regístrate primero.';
+    setAuthMessage('Usuario no encontrado. Regístrate primero.');
     return;
   }
 
   const passwordHash = await hashPassword(password);
   if (client.passwordHash !== passwordHash) {
-    clientAccessMessage.textContent = 'Contraseña incorrecta.';
+    setAuthMessage('Contraseña incorrecta.');
     return;
   }
 
@@ -238,7 +238,7 @@ async function saveDeliveryInfo(event) {
   updateStats();
 }
 
-function cycleStatus(currentStatus) {
+function renderOrders() {
   const query = searchInput.value.toLowerCase().trim();
   const status = filterStatus.value;
   const visibleOrders = orders.filter(order => {
@@ -427,6 +427,8 @@ async function initApp() {
   }
 
   updateStats();
+  setAuthMode('login');
+  updateClientUI();
 }
 
 initApp();
