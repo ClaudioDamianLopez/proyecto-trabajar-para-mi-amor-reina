@@ -346,29 +346,6 @@ function showDeliverySection(order) {
   deliveryMessage.textContent = '';
 }
 
-function showClientPanel() {
-  clientAccessPanel.classList.toggle('hidden');
-  clientAccessMessage.textContent = '';
-}
-
-async function saveDeliveryInfo(event) {
-  event.preventDefault();
-
-  if (!activeClientOrder) {
-    return;
-  }
-
-  activeClientOrder.deliveryEquipo = deliveryEquipo.value.trim();
-  activeClientOrder.deliveryAccesorios = deliveryAccesorios.value.trim();
-  activeClientOrder.deliveryEstado = deliveryEstado.value;
-  activeClientOrder.deliveryNotes = deliveryNotes.value.trim();
-
-  await saveOrderToDB(activeClientOrder);
-  deliveryMessage.textContent = 'Información de entrega guardada correctamente.';
-  renderOrders();
-  updateStats();
-}
-
 function handleOrderSelectChange() {
   if (!clientOrderSelect.value) {
     deliverySection.classList.add('hidden');
